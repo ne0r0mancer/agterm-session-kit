@@ -8,6 +8,8 @@ Claude Code. They let you:
 - **restore** any session or workspace on demand by pasting a one-line snippet copied from that page;
 - **upgrade** agterm without losing track of which Claude conversation ran in which session.
 
+![snapshot page with the session details panel open (sample data)](docs/screenshot.png)
+
 Closing a session frees the memory of everything it runs. The snapshot is what lets you close sessions
 freely and bring back the ones you need later, each with its own conversation, even when several share a
 directory.

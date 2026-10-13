@@ -3,3 +3,4 @@ __pycache__/
 *.html
 state-backup-*/
 .DS_Store
+!docs/demo/sample-snapshot.json
