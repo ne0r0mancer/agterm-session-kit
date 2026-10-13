@@ -63,18 +63,26 @@ Snapshots go to `~/agterm-snapshots`; set `AGT_SNAP_DIR` to change it.
 ## How a session is restored
 
 `agt-restore` creates a new session in the frontmost window, in the workspace with the same name (created if
-missing), with the saved name and directory, then types one line into it:
+missing), with the saved name and directory, then types one line into each pane:
 
-1. if the session was running a program other than Claude (`make dev-watch`), that command;
-2. else if it has a Claude conversation, `claude --resume <conversation-id>`;
-3. else nothing, a plain shell.
+1. if a running Claude was found in the pane, `claude --resume <conversation-id>`, even under a wrapper
+   such as `caffeinate -i claude`;
+2. else the program it was running (`make dev-watch`, `./bin/server`, `bash ./watch.sh`), as captured;
+3. else, for a conversation found only through the fish wrapper's naming, `claude --resume <id>`;
+4. else nothing, a plain shell.
 
 The conversation is found, in order, from:
 
 1. a live Claude Code session in `~/.claude/sessions/*.json` whose process carries the agterm session's
-   `AGTERM_SESSION_ID` (works whatever the process is called: native `claude`, npm `node`, an SDK host);
-2. `--resume`/`--session-id` in the session's running command;
-3. a transcript named after the agterm session id, which is what the fish wrapper creates.
+   `AGTERM_SESSION_ID` (works whatever the process is called: native `claude`, npm `node`, an SDK host).
+   `AGTERM_PANE` / `AGTERM_PANE_ID` say whether it runs in the main pane or the split; scratch and overlay
+   processes are ignored, and so is a headless `claude -p` or SDK child of another Claude;
+2. `--resume`/`--session-id` in the pane's running command;
+3. for the main pane, a transcript named after the agterm session id, which is what the fish wrapper creates.
+
+Pasting a restore line twice does not duplicate anything: a session already restored from that snapshot
+(recorded in `<snapshot>.restored.tsv`) is selected, and one whose conversation a running Claude already holds
+is skipped. A line holding control characters is printed for you to run by hand instead of typed.
 
 The page shows the conversation id in every row and at the top of the details panel, with **copy id** and
 **copy resume command** (`cd <dir> && claude --resume <id>`, usable in any terminal or pasted to Claude), and

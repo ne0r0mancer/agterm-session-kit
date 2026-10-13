@@ -4,30 +4,54 @@
 set -eu
 . "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
 need
+jq() { "$JQ" "$@"; }
+AGTERMCTL=$CTL
 [ -n "$PY" ] || { echo "python3 not found" >&2; exit 1; }
-umask 077
-mkdir -p "$SNAP_DIR" && chmod 700 "$SNAP_DIR"
-stamp=$(date +%Y-%m-%d-%H%M%S)
-work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+dir=$SNAP_DIR
 
-"$CTL" window list --json > "$work/windows.json"
-for w in $("$JQ" -r '.result.windows[] | select(.open) | .id' "$work/windows.json"); do
-  "$CTL" tree --window "$w" --json > "$work/tree-$w.json"
-  for s in $("$JQ" -r '.result.tree.workspaces[].sessions[].id' "$work/tree-$w.json"); do
-    "$CTL" session text --target "$s" --window "$w" --lines 60 > "$work/screen-$s.txt" 2>/dev/null || true
+umask 077
+mkdir -p "$dir" && chmod 700 "$dir"
+stamp=$(date +%Y-%m-%d-%H%M%S)
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+
+"$AGTERMCTL" window list --json > "$work/windows.json"
+jq -r '.result.windows[] | select(.open) | .id' "$work/windows.json" | while read -r w; do
+  "$AGTERMCTL" tree --window "$w" --json > "$work/tree-$w.json"
+  jq -r '.result.tree.workspaces[].sessions[].id' "$work/tree-$w.json" | while read -r s; do
+    "$AGTERMCTL" session text --target "$s" --window "$w" --lines 60 > "$work/screen-$s.txt" 2>/dev/null || true
   done
 done
 
-# live Claude Code sessions -> the agterm session they run in. Read from Claude's own registry rather than
-# by process name: an npm install runs as `node`, an SDK host under its own path.
+# live Claude Code sessions -> the agterm session and pane they run in, from Claude's own registry rather
+# than by process name: an npm install runs as `node`, an SDK host under its own path.
+# Every surface of a session shares AGTERM_SESSION_ID; AGTERM_PANE and AGTERM_PANE_ID tell them apart.
+# A headless `claude -p` or SDK child started by a Claude inherits its pane's environment and registers too,
+# so an entry with another registered Claude among its ancestors is not the pane's own conversation.
 : > "$work/claude.tsv"
+pids=" "
 for j in "$HOME"/.claude/sessions/*.json; do
   [ -f "$j" ] || continue
-  p=$("$JQ" -r '.pid // empty' "$j"); [ -n "$p" ] && kill -0 "$p" 2>/dev/null || continue
-  asid=$(ps eww -p "$p" -o command= | tr ' ' '\n' | sed -n 's/^AGTERM_SESSION_ID=//p')
-  [ -n "$asid" ] && printf '%s\t%s\n' "$asid" "$("$JQ" -r .sessionId "$j")" >> "$work/claude.tsv"
+  p=$(jq -r '.pid // empty' "$j")
+  if [ -n "$p" ] && kill -0 "$p" 2>/dev/null; then pids="$pids$p "; fi
+done
+for j in "$HOME"/.claude/sessions/*.json; do
+  [ -f "$j" ] || continue
+  p=$(jq -r '.pid // empty' "$j")
+  case $pids in *" $p "*) ;; *) continue ;; esac
+  a=$p nested=
+  while a=$(ps -o ppid= -p "$a" | tr -d ' ') && [ -n "$a" ] && [ "$a" -gt 1 ]; do
+    case $pids in *" $a "*) nested=1; break ;; esac
+  done
+  [ -z "$nested" ] || continue
+  env=$(ps eww -p "$p" -o command= | tr ' ' '\n')
+  asid=$(sed -n 's/^AGTERM_SESSION_ID=//p' <<< "$env")
+  pane=$(sed -n 's/^AGTERM_PANE=//p' <<< "$env")
+  pane_id=$(sed -n 's/^AGTERM_PANE_ID=//p' <<< "$env")
+  if [ -n "$asid" ]; then
+    printf '%s\t%s\t%s\t%s\n' "$asid" "$pane" "$pane_id" "$(jq -r .sessionId "$j")" >> "$work/claude.tsv"
+  fi
 done
 
-"$PY" "$KIT_ROOT/lib/render.py" "$work" "$SNAP_DIR" "$stamp" "$KIT_ROOT/bin/agt-restore"
-[ "${1:-}" = --open ] && open "$SNAP_DIR/latest.html"
-exit 0
+"$PY" "$KIT_ROOT/lib/render.py" "$work" "$dir" "$stamp" "$KIT_ROOT/bin/agt-restore"
+if [ "${1:-}" = --open ]; then open "$dir/latest.html"; fi

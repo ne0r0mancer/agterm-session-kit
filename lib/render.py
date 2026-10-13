@@ -1,5 +1,13 @@
+#!/usr/bin/env python3
 """Render an agt-snapshot work dir into <stamp>.json and <stamp>.html. Called by bin/agt-snapshot."""
-import collections, datetime, glob, json, os, re, shlex, sys
+import collections
+import datetime
+import glob
+import json
+import os
+import re
+import shlex
+import sys
 
 work, out, stamp, restore_bin = sys.argv[1:5]
 home = os.path.expanduser("~")
@@ -9,48 +17,87 @@ MAX_TURNS = int(os.environ.get("AGT_SNAP_TURNS", "200"))  # 0 keeps conversation
 MAX_TEXT = 6000
 
 
-def tilde(p): return "~" + p[len(home):] if p and p.startswith(home) else (p or "")
-def prog(argv): return os.path.basename(argv[0]).lstrip("-") if argv else ""
-def clip(t): return t if len(t) <= MAX_TEXT else t[:MAX_TEXT] + f"\n… [{len(t) - MAX_TEXT} more characters]"
+def tilde(p):
+    return "~" + p[len(home):] if p and p.startswith(home) else (p or "")
 
 
-live = {}
-for line in open(f"{work}/claude.tsv"):
-    a, s = line.rstrip("\n").split("\t")
-    live[a.upper()] = s.lower()
+def prog(argv):
+    return os.path.basename(argv[0]).lstrip("-") if argv else ""
+
+
+def clip(t):
+    return t if len(t) <= MAX_TEXT else t[:MAX_TEXT] + f"\n… [{len(t) - MAX_TEXT} more characters]"
+
+
+def mtime(path):
+    return datetime.datetime.fromtimestamp(os.path.getmtime(path)).strftime("%Y-%m-%d %H:%M")
+
+
+LIVE = "running claude process"
+CMDLINE = "claude command line"
+WRAPPER = "transcript named after the agterm session (per-tab wrapper)"
+
+# (agterm session id, AGTERM_PANE, AGTERM_PANE_ID, conversation id) per live Claude process
+live = []
+with open(f"{work}/claude.tsv") as f:
+    for line in f:
+        a, pane, pane_id, s = line.rstrip("\n").split("\t")
+        live.append((a.upper(), pane, pane_id.upper(), s.lower()))
+
+
+def live_conversation(sess, role):
+    """The conversation a live Claude runs in this session's `role` pane, left or right. AGTERM_PANE is baked at
+    spawn and goes stale when a split is promoted, so the pane id read back from `surfaces` wins when present."""
+    kinds = {x["paneID"].upper(): x.get("kind") for x in sess.get("surfaces") or [] if x.get("paneID")}
+    for a, pane, pane_id, sid in live:
+        if a == sess["id"].upper() and kinds.get(pane_id, pane) == role:
+            return sid
+    return None
 
 
 def blocks(o):
     c = (o.get("message") or {}).get("content")
-    if isinstance(c, str): return [{"type": "text", "text": c}]
+    if isinstance(c, str):
+        return [{"type": "text", "text": c}]
     return [x for x in c if isinstance(x, dict)] if isinstance(c, list) else []
 
 
+def text_of(o):
+    return "\n".join(b.get("text", "") for b in blocks(o) if b.get("type") == "text").strip()
+
+
 def transcript(sid):
-    if not sid: return None
-    m = glob.glob(f"{home}/.claude/projects/*/{sid.lower()}.jsonl")
-    if not m: return None
+    m = glob.glob(f"{home}/.claude/projects/*/{sid.lower()}.jsonl") if sid else []
+    if not m:
+        return None
     info = {"sid": sid.lower(), "path": tilde(m[0]), "size": os.path.getsize(m[0]), "cwd": None, "branch": None,
             "model": None, "version": None, "started": None, "title": None, "prompts": 0, "replies": 0}
     custom, tools, turns = None, collections.Counter(), []
     with open(m[0], errors="replace") as f:
         for line in f:
-            if '"type"' not in line: continue
-            try: o = json.loads(line)
-            except ValueError: continue
+            if '"type"' not in line:
+                continue
+            try:
+                o = json.loads(line)
+            except ValueError:
+                continue
             t, ts = o.get("type"), o.get("timestamp")
-            if t == "custom-title": custom = o.get("customTitle") or custom
-            elif t == "ai-title": info["title"] = o.get("aiTitle") or info["title"]
-            if t not in ("user", "assistant") or o.get("isMeta") or o.get("isSidechain"): continue
+            if t == "custom-title":
+                custom = o.get("customTitle") or custom
+            elif t == "ai-title":
+                info["title"] = o.get("aiTitle") or info["title"]
+            if t not in ("user", "assistant") or o.get("isMeta") or o.get("isSidechain"):
+                continue
             info["started"] = info["started"] or ts
             info["cwd"] = info["cwd"] or o.get("cwd")
             info["branch"] = o.get("gitBranch") or info["branch"]
             info["version"] = o.get("version") or info["version"]
-            text = "\n".join(b.get("text", "") for b in blocks(o) if b.get("type") == "text").strip()
+            text = text_of(o)
             if t == "assistant":
                 info["model"] = (o.get("message") or {}).get("model") or info["model"]
                 for b in blocks(o):
-                    if b.get("type") == "tool_use": tools[b.get("name") or "?"] += 1
+                    if b.get("type") == "tool_use":
+                        tools[b.get("name") or "?"] += 1
                 if text:
                     info["replies"] += 1
                     turns.append({"role": "assistant", "ts": ts, "text": clip(text)})
@@ -58,7 +105,7 @@ def transcript(sid):
                 info["prompts"] += 1
                 turns.append({"role": "user", "ts": ts, "text": clip(text)})
     info["title"] = custom or info["title"]
-    info["modified"] = datetime.datetime.fromtimestamp(os.path.getmtime(m[0])).strftime("%Y-%m-%d %H:%M")
+    info["modified"] = mtime(m[0])
     info["tools"] = tools.most_common()
     info["omitted"] = max(0, len(turns) - MAX_TURNS)
     info["turns"] = turns[-MAX_TURNS:] if MAX_TURNS > 0 else []
@@ -67,100 +114,142 @@ def transcript(sid):
     return info
 
 
-def conversation(sess_id, fg):
-    """The session's conversation and how it was matched, or (None, None)."""
+def conversation(sess, role, fg):
+    """The conversation in the session's `role` pane and how it was matched, or (None, None)."""
     found = []
-    if live.get(sess_id.upper()): found.append((live[sess_id.upper()], "running claude process"))
+    sid = live_conversation(sess, role)
+    if sid:
+        found.append((sid, LIVE))
     if prog(fg) == "claude":
         for i, a in enumerate(fg[:-1]):
-            if a in ("-r", "--resume", "--session-id") and UUID.match(fg[i + 1]): found.append((fg[i + 1], "claude command line"))
-    found.append((sess_id, "transcript named after the agterm session (fish wrapper)"))
+            if a in ("-r", "--resume", "--session-id") and UUID.match(fg[i + 1]):
+                found.append((fg[i + 1], CMDLINE))
+    if role == "left":
+        found.append((sess["id"], WRAPPER))
     for sid, how in found:
         t = transcript(sid)
-        if t: return t, how
+        if t:
+            return t, how
     return None, None
 
 
 def candidates(cwd, n=5):
     """Recent conversations started in cwd, for a session no conversation could be matched to."""
     d = f"{home}/.claude/projects/{re.sub(r'[^A-Za-z0-9]', '-', cwd)}"
-    out = []
-    for f in sorted(glob.glob(f"{d}/*.jsonl"), key=os.path.getmtime, reverse=True)[:n]:
+    found = []
+    for path in sorted(glob.glob(f"{d}/*.jsonl"), key=os.path.getmtime, reverse=True)[:n]:
         title, custom, first = None, None, None
-        with open(f, errors="replace") as fh:
-            for line in fh:
-                if '"custom-title"' in line or '"ai-title"' in line or (first is None and '"type":"user"' in line):
-                    try: o = json.loads(line)
-                    except ValueError: continue
-                    t = o.get("type")
-                    if t == "custom-title": custom = o.get("customTitle") or custom
-                    elif t == "ai-title": title = o.get("aiTitle") or title
-                    elif t == "user" and not o.get("isMeta"):
-                        txt = "\n".join(b.get("text", "") for b in blocks(o) if b.get("type") == "text").strip()
-                        if txt and not txt.startswith("<"): first = clip(txt[:300]) if MAX_TURNS > 0 else None
-        sid = os.path.basename(f)[:-6]
-        out.append({"sid": sid, "title": custom or title,
-                    "modified": datetime.datetime.fromtimestamp(os.path.getmtime(f)).strftime("%Y-%m-%d %H:%M"),
-                    "first": first, "resume": f"cd {shlex.quote(cwd)} && claude --resume {sid}"})
-    return out
+        with open(path, errors="replace") as f:
+            for line in f:
+                if not ('"custom-title"' in line or '"ai-title"' in line or (first is None and '"type":"user"' in line)):
+                    continue
+                try:
+                    o = json.loads(line)
+                except ValueError:
+                    continue
+                t = o.get("type")
+                if t == "custom-title":
+                    custom = o.get("customTitle") or custom
+                elif t == "ai-title":
+                    title = o.get("aiTitle") or title
+                elif t == "user" and not o.get("isMeta"):
+                    txt = text_of(o)
+                    if txt and not txt.startswith("<"):
+                        first = clip(txt[:300]) if MAX_TURNS > 0 else None
+        sid = os.path.basename(path)[:-6]
+        found.append({"sid": sid, "title": custom or title, "modified": mtime(path), "first": first,
+                      "resume": f"cd {shlex.quote(cwd)} && claude --resume {sid}"})
+    return found
 
 
-def resume_line(conv, fg, cwd):
+def running(fg):
+    """Whether fg is a program to replay rather than an idle shell. A shell running a script or -c is a program."""
     p = prog(fg)
-    if p and p not in SHELLS and p != "claude": return shlex.join([p] + fg[1:])
-    if conv:
-        line = f"claude --resume {conv['sid']}"
-        return line if not conv["cwd"] or conv["cwd"] == cwd else f"cd {shlex.quote(conv['cwd'])} && {line}"
-    return None
+    if not p or p == "login":
+        return False
+    return p not in SHELLS or any(a == "-c" or not a.startswith("-") for a in fg[1:])
 
 
-snap = {"stamp": stamp, "created": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "windows": [], "sessions": []}
-for w in json.load(open(f"{work}/windows.json"))["result"]["windows"]:
+def restore_line(conv, matched, fg, here, start):
+    """What agt-restore types into a new pane whose shell opens in `start`: claude --resume when a conversation was
+    found in the pane (a live Claude may sit under a wrapper such as caffeinate), else the program it ran, else
+    nothing. A transcript named after the session only counts when no other program holds the pane."""
+    line, target = None, here
+    if conv and (matched in (LIVE, CMDLINE) or not running(fg)):
+        line, target = f"claude --resume {conv['sid']}", conv["cwd"] or here
+    elif running(fg):
+        line = shlex.join(fg)
+    if target != start:
+        line = f"cd {shlex.quote(target)}" + (f" && {line}" if line else "")
+    return line
+
+
+snap_path = os.path.abspath(f"{out}/{stamp}.json")
+snap = {"stamp": stamp, "created": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "file": tilde(snap_path),
+        "windows": [], "sessions": []}
+with open(f"{work}/windows.json") as f:
+    windows = json.load(f)["result"]["windows"]
+for w in windows:
     path = f"{work}/tree-{w['id']}.json"
-    if not os.path.exists(path): continue
-    tree = json.load(open(path))["result"]["tree"]
+    if not os.path.exists(path):
+        continue
+    with open(path) as f:
+        tree = json.load(f)["result"]["tree"]
     win = {"id": w["id"], "name": w.get("name") or "window", "workspaces": []}
     for ws in tree.get("workspaces", []):
-        wsn = {"id": ws["id"], "name": ws.get("name", ""), "sessions": []}
+        wsn = {"id": ws["id"], "name": ws.get("name", ""), "sessions": [],
+               "snippet": shlex.join([restore_bin, snap_path, "--workspace", ws["id"]])}
         for s in ws.get("sessions", []):
             fg, cwd = s.get("foreground") or [], s.get("cwd") or home
-            conv, matched = conversation(s["id"], fg)
+            conv, matched = conversation(s, "left", fg)
             split = None
             if s.get("hasSplit") or s.get("split"):
                 sfg, scwd = s.get("splitForeground") or [], s.get("splitCwd") or cwd
-                sline = shlex.join(sfg) if sfg and prog(sfg) not in SHELLS else None
-                if scwd != cwd: sline = f"cd {shlex.quote(scwd)}" + (f" && {sline}" if sline else "")
-                split = {"cwd": scwd, "foreground": sfg, "restore": sline}
-            try: screen = open(f"{work}/screen-{s['id']}.txt", errors="replace").read().rstrip()
-            except OSError: screen = ""
+                sconv, smatched = conversation(s, "right", sfg)
+                split = {"cwd": scwd, "foreground": sfg, "matched": smatched,
+                         "claude": sconv and {k: sconv[k] for k in ("sid", "title", "cwd")},
+                         "restore": restore_line(sconv, smatched, sfg, scwd, cwd)}
+            try:
+                with open(f"{work}/screen-{s['id']}.txt", errors="replace") as f:
+                    screen = f.read().rstrip()
+            except OSError:
+                screen = ""
             rec = {"id": s["id"], "name": s.get("name", ""), "title": s.get("title"), "workspace": wsn["name"],
                    "workspaceId": ws["id"], "window": win["name"], "cwd": cwd, "foreground": fg,
                    "flagged": bool(s.get("flagged")), "status": s.get("status"), "claude": conv,
-                   "restore": resume_line(conv, fg, cwd), "split": split, "screen": screen, "matched": matched,
+                   "restore": restore_line(conv, matched, fg, cwd, cwd), "split": split, "screen": screen, "matched": matched,
                    "resume": conv and f"cd {shlex.quote(conv['cwd'] or cwd)} && claude --resume {conv['sid']}",
                    "candidates": [] if conv else candidates(cwd),
-                   "snippet": f"{tilde(restore_bin)} {tilde(f'{out}/{stamp}.json')} {s['id']}"}
+                   "snippet": shlex.join([restore_bin, snap_path, s["id"]])}
             snap["sessions"].append(rec)
             wsn["sessions"].append(rec["id"])
-        wsn["snippet"] = f"{tilde(restore_bin)} {tilde(f'{out}/{stamp}.json')} --workspace {ws['id']}"
         win["workspaces"].append(wsn)
     snap["windows"].append(win)
 
 by_conv = collections.defaultdict(list)
 for s in snap["sessions"]:
-    if s["claude"]: by_conv[s["claude"]["sid"]].append(s)
+    label = f"{s['workspace']} / {s['name']}"
+    for c, where in ((s["claude"], label), (s["split"] and s["split"]["claude"], f"{label} (split)")):
+        if c:
+            by_conv[c["sid"]].append((s, where))
 for group in by_conv.values():
-    for s in group: s["sharedWith"] = [f"{o['workspace']} / {o['name']}" for o in group if o is not s]
+    for s, where in group:
+        s.setdefault("sharedWith", []).extend(w for o, w in group if not (o is s and w == where))
 
-jpath = f"{out}/{stamp}.json"
-snap["file"] = tilde(jpath)
-json.dump(snap, open(jpath, "w"), indent=1, ensure_ascii=False)
+with open(snap_path, "w") as f:
+    json.dump(snap, f, indent=1, ensure_ascii=False)
 
-data = json.dumps(snap, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")  # inert inside <script>
-page = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "page.html")).read()
+# escaped so nothing in a command line or a conversation can close the <script> it is embedded in
+data = json.dumps(snap, ensure_ascii=False)
+for ch, esc in (("<", "\\u003c"), (">", "\\u003e"), ("&", "\\u0026"), (" ", "\\u2028"), (" ", "\\u2029")):
+    data = data.replace(ch, esc)
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "page.html")) as f:
+    page = f.read()
 hpath = f"{out}/{stamp}.html"
-open(hpath, "w").write(page.replace("/*__SNAPSHOT__*/null", data, 1))
+with open(hpath, "w") as f:
+    f.write(page.replace("/*__SNAPSHOT__*/null", data, 1))
 latest = f"{out}/latest.html"
-if os.path.lexists(latest): os.remove(latest)
+if os.path.lexists(latest):
+    os.remove(latest)
 os.symlink(os.path.basename(hpath), latest)
 print(hpath)
