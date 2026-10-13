@@ -14,7 +14,7 @@ work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
 for w in $("$JQ" -r '.result.windows[] | select(.open) | .id' "$work/windows.json"); do
   "$CTL" tree --window "$w" --json > "$work/tree-$w.json"
   for s in $("$JQ" -r '.result.tree.workspaces[].sessions[].id' "$work/tree-$w.json"); do
-    "$CTL" session text --target "$s" --window "$w" --lines 20 > "$work/screen-$s.txt" 2>/dev/null || true
+    "$CTL" session text --target "$s" --window "$w" --lines 60 > "$work/screen-$s.txt" 2>/dev/null || true
   done
 done
 

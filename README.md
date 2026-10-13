@@ -46,6 +46,11 @@ command "snapshot sessions"  ~/.local/bin/agt-snapshot --open
 You rarely type `agt-restore` yourself: the HTML page has a **copy** button per session and per workspace that
 puts the exact command on the clipboard. Paste it into any agterm shell.
 
+Click a session to open its details beside the tree (full screen on a narrow window): directory, running
+command, ids, the Claude conversation's title, branch, model, tools used and its message timeline (your
+prompts and Claude's replies, searchable, newest first), plus the last 60 screen lines. ↑/↓ moves between
+sessions, Esc closes, `/` focuses the filter, and the URL hash links straight to a session.
+
 Snapshots go to `~/agterm-snapshots`; set `AGT_SNAP_DIR` to change it.
 
 ## How a session is restored
