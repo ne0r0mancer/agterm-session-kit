@@ -25,9 +25,14 @@ directory.
 ```sh
 git clone <this repo> ~/dev/agterm-session-kit
 cd ~/dev/agterm-session-kit
-./install.sh            # links bin/* into ~/.local/bin
-./install.sh --fish     # also installs the fish `claude` wrapper (backs up an existing one)
+./install.sh                    # links bin/* into ~/.local/bin
+./install.sh --fish             # also installs the fish `claude` wrapper
+./install.sh --fish --force     # replace files the kit did not create (each is backed up as .bak.<time>)
+./install.sh ~/bin              # install somewhere else
 ```
+
+Re-running is safe: links that already point at the kit are left as they are. Without `--force`, an existing
+command of the same name or a different `claude.fish` is skipped with a message rather than overwritten.
 
 Optional: run the snapshot from agterm's command palette by adding to `~/.config/agterm/keymap.conf`:
 
