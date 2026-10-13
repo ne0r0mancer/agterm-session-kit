@@ -6,7 +6,7 @@ set -eu
 need
 [ -n "$PY" ] || { echo "python3 not found" >&2; exit 1; }
 umask 077
-mkdir -p "$SNAP_DIR"
+mkdir -p "$SNAP_DIR" && chmod 700 "$SNAP_DIR"
 stamp=$(date +%Y-%m-%d-%H%M%S)
 work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
 

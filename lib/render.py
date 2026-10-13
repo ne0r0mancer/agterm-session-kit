@@ -5,7 +5,8 @@ work, out, stamp, restore_bin = sys.argv[1:5]
 home = os.path.expanduser("~")
 UUID = re.compile(r"^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$")
 SHELLS = {"zsh", "bash", "fish", "sh", "login"}
-MAX_TURNS, MAX_TEXT = 200, 6000  # per conversation, keeps a page with dozens of agents in the low MBs
+MAX_TURNS = int(os.environ.get("AGT_SNAP_TURNS", "200"))  # 0 keeps conversation text out of the snapshot
+MAX_TEXT = 6000
 
 
 def tilde(p): return "~" + p[len(home):] if p and p.startswith(home) else (p or "")
@@ -60,9 +61,9 @@ def transcript(sid):
     info["modified"] = datetime.datetime.fromtimestamp(os.path.getmtime(m[0])).strftime("%Y-%m-%d %H:%M")
     info["tools"] = tools.most_common()
     info["omitted"] = max(0, len(turns) - MAX_TURNS)
-    info["turns"] = turns[-MAX_TURNS:]
+    info["turns"] = turns[-MAX_TURNS:] if MAX_TURNS > 0 else []
     prompts = [x["text"] for x in turns if x["role"] == "user"]
-    info["first"], info["last"] = (prompts[0], prompts[-1]) if prompts else (None, None)
+    info["first"], info["last"] = (prompts[0], prompts[-1]) if prompts and MAX_TURNS > 0 else (None, None)
     return info
 
 
@@ -118,7 +119,7 @@ jpath = f"{out}/{stamp}.json"
 snap["file"] = tilde(jpath)
 json.dump(snap, open(jpath, "w"), indent=1, ensure_ascii=False)
 
-data = json.dumps(snap, ensure_ascii=False).replace("</", "<\\/")
+data = json.dumps(snap, ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")  # inert inside <script>
 page = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "page.html")).read()
 hpath = f"{out}/{stamp}.html"
 open(hpath, "w").write(page.replace("/*__SNAPSHOT__*/null", data, 1))

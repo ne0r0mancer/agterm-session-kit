@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 /usr/bin/python3 -c '
 import json, sys
-d = json.dumps(json.load(open("sample-snapshot.json")), ensure_ascii=False).replace("</", "<\\/")
+d = json.dumps(json.load(open("sample-snapshot.json")), ensure_ascii=False).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026").replace("\u2028", "\\u2028").replace("\u2029", "\\u2029")
 open(sys.argv[1], "w").write(open("../../lib/page.html").read().replace("/*__SNAPSHOT__*/null", d, 1))
 ' "$tmp/demo.html"
 "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --user-data-dir="$tmp/profile" \

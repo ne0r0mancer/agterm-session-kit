@@ -102,8 +102,10 @@ the backup back into that folder.
 
 ## Privacy
 
-Snapshots hold full command lines and the last screen lines of every session, which can include tokens or
-keys. Files are created `0600` and `.gitignore` excludes them; do not commit or share a snapshot.
+Snapshots hold full command lines, the last screen lines of every session and up to 200 messages of each Claude
+conversation, any of which can include tokens or keys. The snapshot directory is kept `0700` and files are created
+`0600`; `.gitignore` excludes them. Do not commit or share a snapshot. Set `AGT_SNAP_TURNS=0` to leave
+conversation text out (titles, ids and counts are still recorded).
 
 ## Notes
 
