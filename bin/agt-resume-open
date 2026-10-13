@@ -1,0 +1,23 @@
+#!/bin/bash
+# After a restart or upgrade: for every snapshot session that is open again but sitting at a shell prompt,
+# type its restore line (claude --resume <id>, or the command it was running).
+# Usage: agt-resume-open [--dry-run] [SNAPSHOT.json]      default: newest snapshot
+set -eu
+. "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+need
+dry=; [ "${1:-}" = --dry-run ] && { dry=1; shift; }
+snap=${1:-$(ls -t "$SNAP_DIR"/*.json 2>/dev/null | head -1)}
+[ -f "$snap" ] || { echo "no snapshot found in $SNAP_DIR" >&2; exit 1; }
+echo "using $snap"
+
+live=$(open_sessions)
+"$JQ" -r '.sessions[] | select(.restore != null) | [.id, .workspace, .name, .restore] | @tsv' "$snap" |
+while IFS=$'\t' read -r id ws name line; do
+  row=$(echo "$live" | grep -i "^$id" || true)
+  [ -n "$row" ] || { echo "not open:        $ws / $name"; continue; }
+  fg=$(echo "$row" | cut -f2)
+  [ -z "$fg" ] || { echo "already running: $ws / $name ($fg)"; continue; }
+  if [ -n "$dry" ]; then echo "would type:      $ws / $name: $line"; continue; fi
+  "$CTL" session type --target "$id" "$line"$'\n' >/dev/null && echo "resumed:         $ws / $name" ||
+    echo "FAILED:          $ws / $name"
+done

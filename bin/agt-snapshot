@@ -1,0 +1,31 @@
+#!/bin/bash
+# Snapshot agterm's open windows into <snapdir>/<stamp>.{json,html} and point latest.html at it.
+# Usage: agt-snapshot [--open]
+set -eu
+. "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+need
+[ -n "$PY" ] || { echo "python3 not found" >&2; exit 1; }
+umask 077
+mkdir -p "$SNAP_DIR"
+stamp=$(date +%Y-%m-%d-%H%M%S)
+work=$(mktemp -d); trap 'rm -rf "$work"' EXIT
+
+"$CTL" window list --json > "$work/windows.json"
+for w in $("$JQ" -r '.result.windows[] | select(.open) | .id' "$work/windows.json"); do
+  "$CTL" tree --window "$w" --json > "$work/tree-$w.json"
+  for s in $("$JQ" -r '.result.tree.workspaces[].sessions[].id' "$work/tree-$w.json"); do
+    "$CTL" session text --target "$s" --window "$w" --lines 20 > "$work/screen-$s.txt" 2>/dev/null || true
+  done
+done
+
+# running claude processes -> the agterm session they run in
+: > "$work/claude.tsv"
+for p in $(pgrep -x claude || true); do
+  j=$HOME/.claude/sessions/$p.json; [ -f "$j" ] || continue
+  asid=$(ps eww -p "$p" -o command= | tr ' ' '\n' | sed -n 's/^AGTERM_SESSION_ID=//p')
+  [ -n "$asid" ] && printf '%s\t%s\n' "$asid" "$("$JQ" -r .sessionId "$j")" >> "$work/claude.tsv"
+done
+
+"$PY" "$KIT_ROOT/lib/render.py" "$work" "$SNAP_DIR" "$stamp" "$KIT_ROOT/bin/agt-restore"
+[ "${1:-}" = --open ] && open "$SNAP_DIR/latest.html"
+exit 0

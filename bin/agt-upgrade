@@ -1,0 +1,14 @@
+#!/bin/bash
+# Upgrade the Homebrew agterm cask with a state backup. Run from Terminal.app AFTER quitting agterm (Cmd-Q):
+# agterm's own shells, and every agent in them, end when it quits.
+set -eu
+. "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+if pgrep -x agterm >/dev/null; then echo "agterm is still running, quit it with Cmd-Q first" >&2; exit 1; fi
+state="${AGTERM_STATE_DIR:-$HOME/Library/Application Support/agterm}"
+backup="$SNAP_DIR/state-backup-$(date +%Y-%m-%d-%H%M%S)"
+mkdir -p "$backup"
+rsync -a --exclude '*.sock' --exclude '*.lock' "$state/" "$backup/"
+echo "state backed up to $backup"
+brew upgrade --cask agterm
+open -a agterm
+echo "once agterm is up, check sessions and run: agt-resume-open"

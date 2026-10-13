@@ -1,0 +1,48 @@
+#!/bin/bash
+# Recreate sessions from an agt-snapshot JSON in the frontmost agterm window.
+# Usage: agt-restore [--dry-run] SNAPSHOT.json SESSION_ID...
+#        agt-restore [--dry-run] SNAPSHOT.json --workspace WORKSPACE_ID
+# A session that is still open is selected instead of duplicated.
+set -eu
+. "$(dirname "$(readlink -f "$0")")/../lib/common.sh"
+need
+dry=; [ "${1:-}" = --dry-run ] && { dry=1; shift; }
+snap=${1:?usage: agt-restore [--dry-run] SNAPSHOT.json SESSION_ID... | --workspace WS_ID}; shift
+[ -f "$snap" ] || { echo "no such snapshot: $snap" >&2; exit 1; }
+if [ "${1:-}" = --workspace ]; then
+  ids=$("$JQ" -r --arg w "${2:?workspace id}" '.sessions[] | select(.workspaceId == $w) | .id' "$snap")
+else
+  ids="$*"
+fi
+[ -n "$ids" ] || { echo "nothing to restore" >&2; exit 1; }
+run() { if [ -n "$dry" ]; then echo "  would run: $*"; else "$@"; fi; }
+
+open_ids=$(open_sessions | cut -f1)
+for id in $ids; do
+  s=$("$JQ" -c --arg id "$id" '.sessions[] | select(.id == $id)' "$snap")
+  [ -n "$s" ] || { echo "not in snapshot: $id"; continue; }
+  ws=$(echo "$s" | "$JQ" -r .workspace); name=$(echo "$s" | "$JQ" -r .name)
+  if echo "$open_ids" | grep -qix "$id"; then
+    run "$CTL" session select --target "$id" >/dev/null 2>&1 || true
+    echo "${dry:+[dry-run] }still open, selected: $ws / $name"; continue
+  fi
+  cwd=$(echo "$s" | "$JQ" -r .cwd); line=$(echo "$s" | "$JQ" -r '.restore // empty')
+  if [ -n "$dry" ]; then
+    new=NEW_SESSION
+    echo "  would run: $CTL session new --workspace-name '$ws' --create-workspace --name '$name' --cwd '$cwd'"
+  else
+    new=$("$CTL" session new --workspace-name "$ws" --create-workspace --name "$name" --cwd "$cwd" --json |
+          "$JQ" -r .result.id)
+  fi
+  [ -n "$line" ] && run "$CTL" session type --target "$new" "$line"$'\n' >/dev/null
+  if [ "$(echo "$s" | "$JQ" -r '.split != null')" = true ]; then
+    run "$CTL" session split on --target "$new" >/dev/null
+    sline=$(echo "$s" | "$JQ" -r '.split.restore // empty')
+    if [ -n "$sline" ]; then
+      [ -n "$dry" ] || sleep 1
+      run "$CTL" session type --target "$new" --pane right "$sline"$'\n' >/dev/null ||
+        echo "  split pane not ready, run by hand: $sline"
+    fi
+  fi
+  echo "${dry:+[dry-run] }restored: $ws / $name${line:+  ($line)}"
+done
