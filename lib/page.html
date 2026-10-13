@@ -61,6 +61,11 @@ pre{background:var(--code);border:1px solid var(--line);border-radius:6px;paddin
 .mt{white-space:pre-wrap;word-break:break-word;font-size:13px}.msg.clamp .mt{max-height:9.5em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 70%,transparent)}
 .more{font-size:12px;color:var(--acc);background:none;border:0;padding:4px 0 0;cursor:pointer}
 .note{color:var(--mut);font-size:12px}
+.sid{font:11px ui-monospace,Menlo,monospace}.row .sid{opacity:.8;flex-shrink:0}
+.row .sub{display:flex;gap:6px;min-width:0}.row .st{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.conv{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px;font-size:13px}.conv .sid{font-size:12px;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+.cand{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px;display:flex;gap:10px;align-items:flex-start}.cand>div{flex:1;min-width:0}
+.cand .t{font-weight:500}.cand .f{color:var(--mut);font-size:12px;margin-top:2px;overflow-wrap:anywhere}
 #cq{flex:1 1 180px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font-size:12px;text-transform:none;letter-spacing:0}
 mark{background:#f3d36b;color:#000;border-radius:2px}
 summary{cursor:pointer;color:var(--mut);font-size:12px}
@@ -111,6 +116,7 @@ function copyBtn(label, text, cls) {
 function badges(s) {
   const p = prog(s.foreground), out = [];
   if (s.claude) out.push(el("span", {class: "b claude"}, "claude"));
+  if ((s.sharedWith || []).length) out.push(el("span", {class: "b flag", title: "same conversation as " + s.sharedWith.join(", ")}, "shared"));
   if (p && !SHELLS.has(p) && p !== "claude") out.push(el("span", {class: "b run"}, p));
   if (s.split) out.push(el("span", {class: "b"}, "split"));
   if (s.flagged) out.push(el("span", {class: "b flag"}, "flagged"));
@@ -136,7 +142,8 @@ function renderTree() {
         el("span", {class: "cnt"}, ws.sessions.length), copyBtn("copy workspace", ws.snippet)));
       const rows = el("div", {class: "rows"});
       for (const id of ws.sessions) {
-        const s = byId[id], c = s.claude, sub = c && c.title && c.title !== s.name.replace(/^✳\s*/, "") ? c.title : "";
+        const s = byId[id], c = s.claude, title = c && c.title && c.title !== s.name.replace(/^✳\s*/, "") ? c.title : "";
+        const sub = c ? [title && el("span", {class: "st"}, title), el("span", {class: "sid", title: "Claude conversation " + c.sid}, c.sid.slice(0, 8))] : null;
         rows.append(el("div", {class: "row", "data-id": id, "data-q": searchText(s), onclick: () => select(id)},
           el("span", {class: "ico"}, "›_"),
           el("span", {class: "nmw"}, el("span", {class: "nm"}, s.name), sub && el("span", {class: "sub"}, sub)),
@@ -197,9 +204,12 @@ function renderDetail(s) {
   const head = el("div", {class: "dh"},
     el("div", {class: "crumb"}, `${s.window} › ${s.workspace}`, el("button", {class: "btn close", onclick: () => select(null)}, "✕ close")),
     el("h2", {}, s.name),
+    c && el("div", {class: "conv"}, "Claude conversation", el("span", {class: "sid"}, c.sid), copyBtn("copy id", c.sid)),
+    (s.sharedWith || []).length > 0 && el("div", {class: "note"}, "⚠ The same conversation is also open in ", s.sharedWith.join(", "),
+      ". Two Claude processes writing to one conversation interleave its history; exit one of them."),
     el("div", {class: "acts"}, badges(s), copyBtn("copy restore snippet", s.snippet, "primary"),
-      s.restore && copyBtn("copy resume command", s.restore),
-      c && copyBtn("copy conversation id", c.sid), copyBtn("copy session id", s.id)));
+      s.resume ? copyBtn("copy resume command", s.resume) : s.restore && copyBtn("copy command", s.restore),
+      copyBtn("copy session id", s.id)));
 
   const parts = [head, el("div", {class: "sec"}, el("h3", {}, "Session"), table([
     ["directory", code(home(s.cwd))], ["running", code((s.foreground || []).join(" ") || "shell prompt")],
@@ -210,13 +220,20 @@ function renderDetail(s) {
   if (c) {
     const started = c.started ? when(c.started) : "";
     parts.push(el("div", {class: "sec"}, el("h3", {}, "Claude"), table([
-      ["title", c.title || "untitled"], ["conversation id", code(c.sid)], ["directory", code(c.cwd || "")],
+      ["title", c.title || "untitled"], ["conversation id", code(c.sid)], ["matched by", s.matched], ["directory", code(c.cwd || "")],
       ["git branch", c.branch], ["model", c.model], ["claude code", c.version],
       ["started", started], ["last activity", c.modified],
       ["messages", `${c.prompts} prompts · ${c.replies} replies`], ["transcript", el("span", {}, code(c.path), ` (${size(c.size)})`)]]),
       c.tools.length ? el("div", {class: "chips"}, c.tools.map(([n, k]) => el("span", {class: "chip", title: n}, `${tool(n)} ${k}`))) : null));
     parts.push(el("div", {class: "sec"}, ...timeline(c)));
   }
+  if (!c && (s.candidates || []).length) parts.push(el("div", {class: "sec"},
+    el("h3", {}, "Recent Claude conversations in this directory"),
+    el("div", {class: "note"}, "No conversation could be matched to this session. These were started in ", code(s.cwd), ", newest first."),
+    s.candidates.map(k => el("div", {class: "cand"}, el("div", {},
+      el("div", {class: "t"}, k.title || "untitled", " ", el("span", {class: "sid"}, k.sid)),
+      el("div", {class: "f"}, k.modified, k.first ? " · " + k.first : "")),
+      copyBtn("copy resume command", k.resume)))));
   if (s.screen) parts.push(el("div", {class: "sec"}, el("h3", {}, "Last screen lines"), el("pre", {}, s.screen)));
   const raw = {...s, claude: c ? {...c, turns: `${c.turns.length} messages`} : null};
   parts.push(el("div", {class: "sec"}, el("details", {}, el("summary", {}, "raw snapshot record"), el("pre", {}, JSON.stringify(raw, null, 2)))));

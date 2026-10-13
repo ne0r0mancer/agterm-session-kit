@@ -18,10 +18,12 @@ for w in $("$JQ" -r '.result.windows[] | select(.open) | .id' "$work/windows.jso
   done
 done
 
-# running claude processes -> the agterm session they run in
+# live Claude Code sessions -> the agterm session they run in. Read from Claude's own registry rather than
+# by process name: an npm install runs as `node`, an SDK host under its own path.
 : > "$work/claude.tsv"
-for p in $(pgrep -x claude || true); do
-  j=$HOME/.claude/sessions/$p.json; [ -f "$j" ] || continue
+for j in "$HOME"/.claude/sessions/*.json; do
+  [ -f "$j" ] || continue
+  p=$("$JQ" -r '.pid // empty' "$j"); [ -n "$p" ] && kill -0 "$p" 2>/dev/null || continue
   asid=$(ps eww -p "$p" -o command= | tr ' ' '\n' | sed -n 's/^AGTERM_SESSION_ID=//p')
   [ -n "$asid" ] && printf '%s\t%s\n' "$asid" "$("$JQ" -r .sessionId "$j")" >> "$work/claude.tsv"
 done

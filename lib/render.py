@@ -68,12 +68,41 @@ def transcript(sid):
 
 
 def conversation(sess_id, fg):
-    sid = live.get(sess_id.upper())
-    if not sid and prog(fg) == "claude":
+    """The session's conversation and how it was matched, or (None, None)."""
+    found = []
+    if live.get(sess_id.upper()): found.append((live[sess_id.upper()], "running claude process"))
+    if prog(fg) == "claude":
         for i, a in enumerate(fg[:-1]):
-            if a in ("-r", "--resume", "--session-id") and UUID.match(fg[i + 1]): sid = fg[i + 1]
-    # the fish wrapper names a tab's conversation after the agterm session id
-    return transcript(sid) or transcript(sess_id)
+            if a in ("-r", "--resume", "--session-id") and UUID.match(fg[i + 1]): found.append((fg[i + 1], "claude command line"))
+    found.append((sess_id, "transcript named after the agterm session (fish wrapper)"))
+    for sid, how in found:
+        t = transcript(sid)
+        if t: return t, how
+    return None, None
+
+
+def candidates(cwd, n=5):
+    """Recent conversations started in cwd, for a session no conversation could be matched to."""
+    d = f"{home}/.claude/projects/{re.sub(r'[^A-Za-z0-9]', '-', cwd)}"
+    out = []
+    for f in sorted(glob.glob(f"{d}/*.jsonl"), key=os.path.getmtime, reverse=True)[:n]:
+        title, custom, first = None, None, None
+        with open(f, errors="replace") as fh:
+            for line in fh:
+                if '"custom-title"' in line or '"ai-title"' in line or (first is None and '"type":"user"' in line):
+                    try: o = json.loads(line)
+                    except ValueError: continue
+                    t = o.get("type")
+                    if t == "custom-title": custom = o.get("customTitle") or custom
+                    elif t == "ai-title": title = o.get("aiTitle") or title
+                    elif t == "user" and not o.get("isMeta"):
+                        txt = "\n".join(b.get("text", "") for b in blocks(o) if b.get("type") == "text").strip()
+                        if txt and not txt.startswith("<"): first = clip(txt[:300]) if MAX_TURNS > 0 else None
+        sid = os.path.basename(f)[:-6]
+        out.append({"sid": sid, "title": custom or title,
+                    "modified": datetime.datetime.fromtimestamp(os.path.getmtime(f)).strftime("%Y-%m-%d %H:%M"),
+                    "first": first, "resume": f"cd {shlex.quote(cwd)} && claude --resume {sid}"})
+    return out
 
 
 def resume_line(conv, fg, cwd):
@@ -95,7 +124,7 @@ for w in json.load(open(f"{work}/windows.json"))["result"]["windows"]:
         wsn = {"id": ws["id"], "name": ws.get("name", ""), "sessions": []}
         for s in ws.get("sessions", []):
             fg, cwd = s.get("foreground") or [], s.get("cwd") or home
-            conv = conversation(s["id"], fg)
+            conv, matched = conversation(s["id"], fg)
             split = None
             if s.get("hasSplit") or s.get("split"):
                 sfg, scwd = s.get("splitForeground") or [], s.get("splitCwd") or cwd
@@ -107,13 +136,21 @@ for w in json.load(open(f"{work}/windows.json"))["result"]["windows"]:
             rec = {"id": s["id"], "name": s.get("name", ""), "title": s.get("title"), "workspace": wsn["name"],
                    "workspaceId": ws["id"], "window": win["name"], "cwd": cwd, "foreground": fg,
                    "flagged": bool(s.get("flagged")), "status": s.get("status"), "claude": conv,
-                   "restore": resume_line(conv, fg, cwd), "split": split, "screen": screen,
+                   "restore": resume_line(conv, fg, cwd), "split": split, "screen": screen, "matched": matched,
+                   "resume": conv and f"cd {shlex.quote(conv['cwd'] or cwd)} && claude --resume {conv['sid']}",
+                   "candidates": [] if conv else candidates(cwd),
                    "snippet": f"{tilde(restore_bin)} {tilde(f'{out}/{stamp}.json')} {s['id']}"}
             snap["sessions"].append(rec)
             wsn["sessions"].append(rec["id"])
         wsn["snippet"] = f"{tilde(restore_bin)} {tilde(f'{out}/{stamp}.json')} --workspace {ws['id']}"
         win["workspaces"].append(wsn)
     snap["windows"].append(win)
+
+by_conv = collections.defaultdict(list)
+for s in snap["sessions"]:
+    if s["claude"]: by_conv[s["claude"]["sid"]].append(s)
+for group in by_conv.values():
+    for s in group: s["sharedWith"] = [f"{o['workspace']} / {o['name']}" for o in group if o is not s]
 
 jpath = f"{out}/{stamp}.json"
 snap["file"] = tilde(jpath)

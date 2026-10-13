@@ -1,378 +1,404 @@
 {
- "stamp": "2026-10-13-091500",
- "created": "2026-10-13 09:15",
- "file": "~/agterm-snapshots/2026-10-13-091500.json",
- "windows": [
-  {
-   "id": "CBBF7F53-D02C-5BC0-B632-603E9C889E09",
-   "name": "main",
-   "workspaces": [
+  "stamp": "2026-10-13-091500",
+  "created": "2026-10-13 09:15",
+  "file": "~/agterm-snapshots/2026-10-13-091500.json",
+  "windows": [
     {
-     "id": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
-     "name": "acme-shop",
-     "sessions": [
-      "7FDE503A-124C-5534-A407-6054A231BAF4",
-      "2B6A347A-9320-5BE1-837B-DE1583217F0B",
-      "7CE49E46-8EEF-51F7-904D-05E24E8DDB67",
-      "2700342D-D3A4-583E-9094-32D146A90931"
-     ],
-     "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json --workspace 60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF"
-    },
-    {
-     "id": "FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139",
-     "name": "infra",
-     "sessions": [
-      "200D28D5-8F4E-54DB-B1DC-4CA11D669366",
-      "B2A0CB11-5950-51C7-A29E-D0029B5AAF58"
-     ],
-     "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json --workspace FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139"
-    },
-    {
-     "id": "1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F",
-     "name": "blog",
-     "sessions": [
-      "AC62C551-683B-5E22-8E4E-40C49E6713BC",
-      "18A2AFF5-2B12-5116-923C-F9ABFC821C66"
-     ],
-     "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json --workspace 1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F"
+      "id": "CBBF7F53-D02C-5BC0-B632-603E9C889E09",
+      "name": "main",
+      "workspaces": [
+        {
+          "id": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
+          "name": "acme-shop",
+          "sessions": [
+            "7FDE503A-124C-5534-A407-6054A231BAF4",
+            "2B6A347A-9320-5BE1-837B-DE1583217F0B",
+            "7CE49E46-8EEF-51F7-904D-05E24E8DDB67",
+            "2700342D-D3A4-583E-9094-32D146A90931"
+          ],
+          "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json --workspace 60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF"
+        },
+        {
+          "id": "FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139",
+          "name": "infra",
+          "sessions": [
+            "200D28D5-8F4E-54DB-B1DC-4CA11D669366",
+            "B2A0CB11-5950-51C7-A29E-D0029B5AAF58"
+          ],
+          "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json --workspace FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139"
+        },
+        {
+          "id": "1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F",
+          "name": "blog",
+          "sessions": [
+            "AC62C551-683B-5E22-8E4E-40C49E6713BC",
+            "18A2AFF5-2B12-5116-923C-F9ABFC821C66"
+          ],
+          "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json --workspace 1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F"
+        }
+      ]
     }
-   ]
-  }
- ],
- "sessions": [
-  {
-   "id": "7FDE503A-124C-5534-A407-6054A231BAF4",
-   "name": "API perf",
-   "title": "✳ Speed up /orders endpoint",
-   "workspace": "acme-shop",
-   "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
-   "window": "main",
-   "cwd": "/Users/alex/dev/acme-shop",
-   "foreground": [
-    "claude",
-    "--resume",
-    "5513b352-dfe9-5541-91a3-a38db7b6dcb6"
-   ],
-   "flagged": false,
-   "status": "completed",
-   "claude": {
-    "sid": "5513b352-dfe9-5541-91a3-a38db7b6dcb6",
-    "path": "~/.claude/projects/-Users-alex-dev-acme-shop/5513b352-dfe9-5541-91a3-a38db7b6dcb6.jsonl",
-    "size": 1835000,
-    "cwd": "/Users/alex/dev/acme-shop",
-    "branch": "perf/orders-prefetch",
-    "model": "claude-opus-5-5",
-    "version": "2.1.296",
-    "started": "2026-10-12T08:41:00Z",
-    "title": "Speed up /orders endpoint",
-    "modified": "2026-10-13 09:12",
-    "tools": [
-     [
-      "Bash",
-      41
-     ],
-     [
-      "Read",
-      23
-     ],
-     [
-      "Edit",
-      9
-     ],
-     [
-      "Grep",
-      7
-     ],
-     [
-      "github · create_pull_request",
-      1
-     ]
-    ],
-    "omitted": 0,
-    "turns": [
-     {
-      "role": "user",
-      "ts": "2026-10-12T08:41:00Z",
-      "text": "The /orders endpoint takes 2s on large accounts. Find out why and fix it."
-     },
-     {
-      "role": "assistant",
-      "ts": "2026-10-12T08:44:10Z",
-      "text": "Found it: `OrderSerializer` loads every line item one query at a time, so an account with 400 orders runs ~1,200 queries.\n\nI switched the list view to `prefetch_related('items__product')` and added a test that pins the query count at 4."
-     },
-     {
-      "role": "user",
-      "ts": "2026-10-12T08:52:30Z",
-      "text": "nice. does pagination still work?"
-     },
-     {
-      "role": "assistant",
-      "ts": "2026-10-12T08:53:05Z",
-      "text": "Yes. Cursor pagination is unchanged and the existing pagination tests pass. Locally the endpoint went from 2.1s to 140ms on the seeded large account."
-     },
-     {
-      "role": "user",
-      "ts": "2026-10-13T09:05:12Z",
-      "text": "open a PR with that and mention the benchmark"
-     },
-     {
-      "role": "assistant",
-      "ts": "2026-10-13T09:12:40Z",
-      "text": "Opened PR #482 \"Prefetch order items in /orders\" with the before/after numbers and the query-count test. CI is running."
-     }
-    ],
-    "prompts": 3,
-    "replies": 3,
-    "first": "The /orders endpoint takes 2s on large accounts. Find out why and fix it.",
-    "last": "open a PR with that and mention the benchmark"
-   },
-   "restore": "claude --resume 5513b352-dfe9-5541-91a3-a38db7b6dcb6",
-   "split": null,
-   "screen": "⏺ Opened PR #482 \"Prefetch order items in /orders\"\n  https://github.com/acme/shop/pull/482\n\n  Before: 2.1s · 1,214 queries\n  After:  140ms · 4 queries\n\n  CI is running (lint, unit, e2e).\n\n╭──────────────────────────────────────────────╮\n│ >                                            │\n╰──────────────────────────────────────────────╯\n  ⏵⏵ auto mode on",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 7FDE503A-124C-5534-A407-6054A231BAF4"
-  },
-  {
-   "id": "2B6A347A-9320-5BE1-837B-DE1583217F0B",
-   "name": "dev server",
-   "title": null,
-   "workspace": "acme-shop",
-   "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
-   "window": "main",
-   "cwd": "/Users/alex/dev/acme-shop",
-   "foreground": [
-    "npm",
-    "run",
-    "dev"
-   ],
-   "flagged": false,
-   "status": null,
-   "claude": null,
-   "restore": "npm run dev",
-   "split": null,
-   "screen": "  VITE v6.2.0  ready in 412 ms\n\n  ➜  Local:   http://localhost:5173/\n  ➜  Network: use --host to expose",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 2B6A347A-9320-5BE1-837B-DE1583217F0B"
-  },
-  {
-   "id": "7CE49E46-8EEF-51F7-904D-05E24E8DDB67",
-   "name": "✳ Checkout coupon bug",
-   "title": null,
-   "workspace": "acme-shop",
-   "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
-   "window": "main",
-   "cwd": "/Users/alex/dev/acme-shop",
-   "foreground": [],
-   "flagged": true,
-   "status": "blocked",
-   "claude": {
-    "sid": "557bfd94-da5b-536a-a54f-ef47313882ca",
-    "path": "~/.claude/projects/-Users-alex-dev-acme-shop/557bfd94-da5b-536a-a54f-ef47313882ca.jsonl",
-    "size": 1835000,
-    "cwd": "/Users/alex/dev/acme-shop",
-    "branch": "main",
-    "model": "claude-opus-5-5",
-    "version": "2.1.296",
-    "started": "2026-10-12T08:41:00Z",
-    "title": "Checkout coupon bug",
-    "modified": "2026-10-13 09:12",
-    "tools": [
-     [
-      "Read",
-      6
-     ]
-    ],
-    "omitted": 0,
-    "turns": [
-     {
-      "role": "user",
-      "ts": "2026-10-13T08:20:00Z",
-      "text": "coupons stack twice when the cart is edited after applying"
-     }
-    ],
-    "prompts": 1,
-    "replies": 0,
-    "first": "coupons stack twice when the cart is edited after applying",
-    "last": "coupons stack twice when the cart is edited after applying"
-   },
-   "restore": "claude --resume 557bfd94-da5b-536a-a54f-ef47313882ca",
-   "split": null,
-   "screen": "",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 7CE49E46-8EEF-51F7-904D-05E24E8DDB67"
-  },
-  {
-   "id": "2700342D-D3A4-583E-9094-32D146A90931",
-   "name": "Release notes",
-   "title": null,
-   "workspace": "acme-shop",
-   "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
-   "window": "main",
-   "cwd": "/Users/alex/dev/acme-shop",
-   "foreground": [],
-   "flagged": false,
-   "status": null,
-   "claude": {
-    "sid": "7a539b3e-6678-5833-a1e7-d24558f7705a",
-    "path": "~/.claude/projects/-Users-alex-dev-acme-shop/7a539b3e-6678-5833-a1e7-d24558f7705a.jsonl",
-    "size": 1835000,
-    "cwd": "/Users/alex/dev/acme-shop",
-    "branch": "main",
-    "model": "claude-opus-5-5",
-    "version": "2.1.296",
-    "started": "2026-10-12T08:41:00Z",
-    "title": "Draft 3.4 release notes",
-    "modified": "2026-10-13 09:12",
-    "tools": [
-     [
-      "Bash",
-      4
-     ]
-    ],
-    "omitted": 0,
-    "turns": [
-     {
-      "role": "user",
-      "ts": "2026-10-11T15:00:00Z",
-      "text": "draft release notes from merged PRs since v3.3"
-     }
-    ],
-    "prompts": 1,
-    "replies": 0,
-    "first": "draft release notes from merged PRs since v3.3",
-    "last": "draft release notes from merged PRs since v3.3"
-   },
-   "restore": "claude --resume 7a539b3e-6678-5833-a1e7-d24558f7705a",
-   "split": null,
-   "screen": "",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 2700342D-D3A4-583E-9094-32D146A90931"
-  },
-  {
-   "id": "200D28D5-8F4E-54DB-B1DC-4CA11D669366",
-   "name": "terraform plan",
-   "title": null,
-   "workspace": "infra",
-   "workspaceId": "FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139",
-   "window": "main",
-   "cwd": "/Users/alex/dev/infra",
-   "foreground": [],
-   "flagged": false,
-   "status": null,
-   "claude": {
-    "sid": "f6cd6754-3c62-5a08-a594-3aee197e40d5",
-    "path": "~/.claude/projects/-Users-alex-dev-infra/f6cd6754-3c62-5a08-a594-3aee197e40d5.jsonl",
-    "size": 1835000,
-    "cwd": "/Users/alex/dev/infra",
-    "branch": "main",
-    "model": "claude-opus-5-5",
-    "version": "2.1.296",
-    "started": "2026-10-12T08:41:00Z",
-    "title": "Move staging to new VPC",
-    "modified": "2026-10-13 09:12",
-    "tools": [
-     [
-      "Bash",
-      12
-     ]
-    ],
-    "omitted": 0,
-    "turns": [
-     {
-      "role": "user",
-      "ts": "2026-10-12T10:00:00Z",
-      "text": "plan the staging VPC move, no apply"
-     }
-    ],
-    "prompts": 1,
-    "replies": 0,
-    "first": "plan the staging VPC move, no apply",
-    "last": "plan the staging VPC move, no apply"
-   },
-   "restore": "claude --resume f6cd6754-3c62-5a08-a594-3aee197e40d5",
-   "split": {
-    "cwd": "/Users/alex/dev/infra",
-    "foreground": [],
-    "restore": null
-   },
-   "screen": "",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 200D28D5-8F4E-54DB-B1DC-4CA11D669366"
-  },
-  {
-   "id": "B2A0CB11-5950-51C7-A29E-D0029B5AAF58",
-   "name": "~/dev/infra",
-   "title": null,
-   "workspace": "infra",
-   "workspaceId": "FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139",
-   "window": "main",
-   "cwd": "/Users/alex/dev/infra",
-   "foreground": [],
-   "flagged": false,
-   "status": null,
-   "claude": null,
-   "restore": null,
-   "split": null,
-   "screen": "",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json B2A0CB11-5950-51C7-A29E-D0029B5AAF58"
-  },
-  {
-   "id": "AC62C551-683B-5E22-8E4E-40C49E6713BC",
-   "name": "✳ New theme",
-   "title": null,
-   "workspace": "blog",
-   "workspaceId": "1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F",
-   "window": "main",
-   "cwd": "/Users/alex/dev/blog",
-   "foreground": [],
-   "flagged": false,
-   "status": null,
-   "claude": {
-    "sid": "d890ec94-355d-51f7-8992-01eb4d06a663",
-    "path": "~/.claude/projects/-Users-alex-dev-blog/d890ec94-355d-51f7-8992-01eb4d06a663.jsonl",
-    "size": 1835000,
-    "cwd": "/Users/alex/dev/blog",
-    "branch": "main",
-    "model": "claude-opus-5-5",
-    "version": "2.1.296",
-    "started": "2026-10-12T08:41:00Z",
-    "title": "Port blog to new theme",
-    "modified": "2026-10-13 09:12",
-    "tools": [
-     [
-      "Edit",
-      30
-     ]
-    ],
-    "omitted": 0,
-    "turns": [
-     {
-      "role": "user",
-      "ts": "2026-10-10T19:30:00Z",
-      "text": "port the posts to the new theme"
-     }
-    ],
-    "prompts": 1,
-    "replies": 0,
-    "first": "port the posts to the new theme",
-    "last": "port the posts to the new theme"
-   },
-   "restore": "claude --resume d890ec94-355d-51f7-8992-01eb4d06a663",
-   "split": null,
-   "screen": "",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json AC62C551-683B-5E22-8E4E-40C49E6713BC"
-  },
-  {
-   "id": "18A2AFF5-2B12-5116-923C-F9ABFC821C66",
-   "name": "~/Downloads",
-   "title": null,
-   "workspace": "blog",
-   "workspaceId": "1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F",
-   "window": "main",
-   "cwd": "/Users/alex/Downloads",
-   "foreground": [],
-   "flagged": false,
-   "status": null,
-   "claude": null,
-   "restore": null,
-   "split": null,
-   "screen": "",
-   "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 18A2AFF5-2B12-5116-923C-F9ABFC821C66"
-  }
- ]
+  ],
+  "sessions": [
+    {
+      "id": "7FDE503A-124C-5534-A407-6054A231BAF4",
+      "name": "API perf",
+      "title": "✳ Speed up /orders endpoint",
+      "workspace": "acme-shop",
+      "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
+      "window": "main",
+      "cwd": "/Users/alex/dev/acme-shop",
+      "foreground": [
+        "claude",
+        "--resume",
+        "5513b352-dfe9-5541-91a3-a38db7b6dcb6"
+      ],
+      "flagged": false,
+      "status": "completed",
+      "claude": {
+        "sid": "5513b352-dfe9-5541-91a3-a38db7b6dcb6",
+        "path": "~/.claude/projects/-Users-alex-dev-acme-shop/5513b352-dfe9-5541-91a3-a38db7b6dcb6.jsonl",
+        "size": 1835000,
+        "cwd": "/Users/alex/dev/acme-shop",
+        "branch": "perf/orders-prefetch",
+        "model": "claude-opus-5-5",
+        "version": "2.1.296",
+        "started": "2026-10-12T08:41:00Z",
+        "title": "Speed up /orders endpoint",
+        "modified": "2026-10-13 09:12",
+        "tools": [
+          [
+            "Bash",
+            41
+          ],
+          [
+            "Read",
+            23
+          ],
+          [
+            "Edit",
+            9
+          ],
+          [
+            "Grep",
+            7
+          ],
+          [
+            "github · create_pull_request",
+            1
+          ]
+        ],
+        "omitted": 0,
+        "turns": [
+          {
+            "role": "user",
+            "ts": "2026-10-12T08:41:00Z",
+            "text": "The /orders endpoint takes 2s on large accounts. Find out why and fix it."
+          },
+          {
+            "role": "assistant",
+            "ts": "2026-10-12T08:44:10Z",
+            "text": "Found it: `OrderSerializer` loads every line item one query at a time, so an account with 400 orders runs ~1,200 queries.\n\nI switched the list view to `prefetch_related('items__product')` and added a test that pins the query count at 4."
+          },
+          {
+            "role": "user",
+            "ts": "2026-10-12T08:52:30Z",
+            "text": "nice. does pagination still work?"
+          },
+          {
+            "role": "assistant",
+            "ts": "2026-10-12T08:53:05Z",
+            "text": "Yes. Cursor pagination is unchanged and the existing pagination tests pass. Locally the endpoint went from 2.1s to 140ms on the seeded large account."
+          },
+          {
+            "role": "user",
+            "ts": "2026-10-13T09:05:12Z",
+            "text": "open a PR with that and mention the benchmark"
+          },
+          {
+            "role": "assistant",
+            "ts": "2026-10-13T09:12:40Z",
+            "text": "Opened PR #482 \"Prefetch order items in /orders\" with the before/after numbers and the query-count test. CI is running."
+          }
+        ],
+        "prompts": 3,
+        "replies": 3,
+        "first": "The /orders endpoint takes 2s on large accounts. Find out why and fix it.",
+        "last": "open a PR with that and mention the benchmark"
+      },
+      "restore": "claude --resume 5513b352-dfe9-5541-91a3-a38db7b6dcb6",
+      "split": null,
+      "screen": "⏺ Opened PR #482 \"Prefetch order items in /orders\"\n  https://github.com/acme/shop/pull/482\n\n  Before: 2.1s · 1,214 queries\n  After:  140ms · 4 queries\n\n  CI is running (lint, unit, e2e).\n\n╭──────────────────────────────────────────────╮\n│ >                                            │\n╰──────────────────────────────────────────────╯\n  ⏵⏵ auto mode on",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 7FDE503A-124C-5534-A407-6054A231BAF4",
+      "matched": "running claude process",
+      "resume": "cd /Users/alex/dev/acme-shop && claude --resume 5513b352-dfe9-5541-91a3-a38db7b6dcb6"
+    },
+    {
+      "id": "2B6A347A-9320-5BE1-837B-DE1583217F0B",
+      "name": "dev server",
+      "title": null,
+      "workspace": "acme-shop",
+      "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
+      "window": "main",
+      "cwd": "/Users/alex/dev/acme-shop",
+      "foreground": [
+        "npm",
+        "run",
+        "dev"
+      ],
+      "flagged": false,
+      "status": null,
+      "claude": null,
+      "restore": "npm run dev",
+      "split": null,
+      "screen": "  VITE v6.2.0  ready in 412 ms\n\n  ➜  Local:   http://localhost:5173/\n  ➜  Network: use --host to expose",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 2B6A347A-9320-5BE1-837B-DE1583217F0B",
+      "candidates": [
+        {
+          "sid": "3f2a9c1e-77b0-4d1a-9c55-0e1f2d3c4b5a",
+          "title": "Fix flaky checkout e2e test",
+          "modified": "2026-10-12 17:40",
+          "first": "the checkout e2e test fails one run in five on CI, find out why",
+          "resume": "cd /Users/alex/dev/acme-shop && claude --resume 3f2a9c1e-77b0-4d1a-9c55-0e1f2d3c4b5a"
+        },
+        {
+          "sid": "9b8c7d6e-5f4a-4b3c-8d2e-1f0a9b8c7d6e",
+          "title": "Upgrade to Vite 6",
+          "modified": "2026-10-09 11:02",
+          "first": "upgrade the frontend to vite 6 and fix whatever breaks",
+          "resume": "cd /Users/alex/dev/acme-shop && claude --resume 9b8c7d6e-5f4a-4b3c-8d2e-1f0a9b8c7d6e"
+        }
+      ]
+    },
+    {
+      "id": "7CE49E46-8EEF-51F7-904D-05E24E8DDB67",
+      "name": "✳ Checkout coupon bug",
+      "title": null,
+      "workspace": "acme-shop",
+      "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
+      "window": "main",
+      "cwd": "/Users/alex/dev/acme-shop",
+      "foreground": [],
+      "flagged": true,
+      "status": "blocked",
+      "claude": {
+        "sid": "557bfd94-da5b-536a-a54f-ef47313882ca",
+        "path": "~/.claude/projects/-Users-alex-dev-acme-shop/557bfd94-da5b-536a-a54f-ef47313882ca.jsonl",
+        "size": 1835000,
+        "cwd": "/Users/alex/dev/acme-shop",
+        "branch": "main",
+        "model": "claude-opus-5-5",
+        "version": "2.1.296",
+        "started": "2026-10-12T08:41:00Z",
+        "title": "Checkout coupon bug",
+        "modified": "2026-10-13 09:12",
+        "tools": [
+          [
+            "Read",
+            6
+          ]
+        ],
+        "omitted": 0,
+        "turns": [
+          {
+            "role": "user",
+            "ts": "2026-10-13T08:20:00Z",
+            "text": "coupons stack twice when the cart is edited after applying"
+          }
+        ],
+        "prompts": 1,
+        "replies": 0,
+        "first": "coupons stack twice when the cart is edited after applying",
+        "last": "coupons stack twice when the cart is edited after applying"
+      },
+      "restore": "claude --resume 557bfd94-da5b-536a-a54f-ef47313882ca",
+      "split": null,
+      "screen": "",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 7CE49E46-8EEF-51F7-904D-05E24E8DDB67",
+      "matched": "running claude process",
+      "resume": "cd /Users/alex/dev/acme-shop && claude --resume 557bfd94-da5b-536a-a54f-ef47313882ca"
+    },
+    {
+      "id": "2700342D-D3A4-583E-9094-32D146A90931",
+      "name": "Release notes",
+      "title": null,
+      "workspace": "acme-shop",
+      "workspaceId": "60F115E2-63F6-55EF-8A5C-1EC9EA80D5CF",
+      "window": "main",
+      "cwd": "/Users/alex/dev/acme-shop",
+      "foreground": [],
+      "flagged": false,
+      "status": null,
+      "claude": {
+        "sid": "7a539b3e-6678-5833-a1e7-d24558f7705a",
+        "path": "~/.claude/projects/-Users-alex-dev-acme-shop/7a539b3e-6678-5833-a1e7-d24558f7705a.jsonl",
+        "size": 1835000,
+        "cwd": "/Users/alex/dev/acme-shop",
+        "branch": "main",
+        "model": "claude-opus-5-5",
+        "version": "2.1.296",
+        "started": "2026-10-12T08:41:00Z",
+        "title": "Draft 3.4 release notes",
+        "modified": "2026-10-13 09:12",
+        "tools": [
+          [
+            "Bash",
+            4
+          ]
+        ],
+        "omitted": 0,
+        "turns": [
+          {
+            "role": "user",
+            "ts": "2026-10-11T15:00:00Z",
+            "text": "draft release notes from merged PRs since v3.3"
+          }
+        ],
+        "prompts": 1,
+        "replies": 0,
+        "first": "draft release notes from merged PRs since v3.3",
+        "last": "draft release notes from merged PRs since v3.3"
+      },
+      "restore": "claude --resume 7a539b3e-6678-5833-a1e7-d24558f7705a",
+      "split": null,
+      "screen": "",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 2700342D-D3A4-583E-9094-32D146A90931",
+      "matched": "running claude process",
+      "resume": "cd /Users/alex/dev/acme-shop && claude --resume 7a539b3e-6678-5833-a1e7-d24558f7705a"
+    },
+    {
+      "id": "200D28D5-8F4E-54DB-B1DC-4CA11D669366",
+      "name": "terraform plan",
+      "title": null,
+      "workspace": "infra",
+      "workspaceId": "FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139",
+      "window": "main",
+      "cwd": "/Users/alex/dev/infra",
+      "foreground": [],
+      "flagged": false,
+      "status": null,
+      "claude": {
+        "sid": "f6cd6754-3c62-5a08-a594-3aee197e40d5",
+        "path": "~/.claude/projects/-Users-alex-dev-infra/f6cd6754-3c62-5a08-a594-3aee197e40d5.jsonl",
+        "size": 1835000,
+        "cwd": "/Users/alex/dev/infra",
+        "branch": "main",
+        "model": "claude-opus-5-5",
+        "version": "2.1.296",
+        "started": "2026-10-12T08:41:00Z",
+        "title": "Move staging to new VPC",
+        "modified": "2026-10-13 09:12",
+        "tools": [
+          [
+            "Bash",
+            12
+          ]
+        ],
+        "omitted": 0,
+        "turns": [
+          {
+            "role": "user",
+            "ts": "2026-10-12T10:00:00Z",
+            "text": "plan the staging VPC move, no apply"
+          }
+        ],
+        "prompts": 1,
+        "replies": 0,
+        "first": "plan the staging VPC move, no apply",
+        "last": "plan the staging VPC move, no apply"
+      },
+      "restore": "claude --resume f6cd6754-3c62-5a08-a594-3aee197e40d5",
+      "split": {
+        "cwd": "/Users/alex/dev/infra",
+        "foreground": [],
+        "restore": null
+      },
+      "screen": "",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 200D28D5-8F4E-54DB-B1DC-4CA11D669366",
+      "matched": "running claude process",
+      "resume": "cd /Users/alex/dev/infra && claude --resume f6cd6754-3c62-5a08-a594-3aee197e40d5"
+    },
+    {
+      "id": "B2A0CB11-5950-51C7-A29E-D0029B5AAF58",
+      "name": "~/dev/infra",
+      "title": null,
+      "workspace": "infra",
+      "workspaceId": "FCF53CC8-6DC4-53CA-8FA0-4C2A593F9139",
+      "window": "main",
+      "cwd": "/Users/alex/dev/infra",
+      "foreground": [],
+      "flagged": false,
+      "status": null,
+      "claude": null,
+      "restore": null,
+      "split": null,
+      "screen": "",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json B2A0CB11-5950-51C7-A29E-D0029B5AAF58"
+    },
+    {
+      "id": "AC62C551-683B-5E22-8E4E-40C49E6713BC",
+      "name": "✳ New theme",
+      "title": null,
+      "workspace": "blog",
+      "workspaceId": "1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F",
+      "window": "main",
+      "cwd": "/Users/alex/dev/blog",
+      "foreground": [],
+      "flagged": false,
+      "status": null,
+      "claude": {
+        "sid": "d890ec94-355d-51f7-8992-01eb4d06a663",
+        "path": "~/.claude/projects/-Users-alex-dev-blog/d890ec94-355d-51f7-8992-01eb4d06a663.jsonl",
+        "size": 1835000,
+        "cwd": "/Users/alex/dev/blog",
+        "branch": "main",
+        "model": "claude-opus-5-5",
+        "version": "2.1.296",
+        "started": "2026-10-12T08:41:00Z",
+        "title": "Port blog to new theme",
+        "modified": "2026-10-13 09:12",
+        "tools": [
+          [
+            "Edit",
+            30
+          ]
+        ],
+        "omitted": 0,
+        "turns": [
+          {
+            "role": "user",
+            "ts": "2026-10-10T19:30:00Z",
+            "text": "port the posts to the new theme"
+          }
+        ],
+        "prompts": 1,
+        "replies": 0,
+        "first": "port the posts to the new theme",
+        "last": "port the posts to the new theme"
+      },
+      "restore": "claude --resume d890ec94-355d-51f7-8992-01eb4d06a663",
+      "split": null,
+      "screen": "",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json AC62C551-683B-5E22-8E4E-40C49E6713BC",
+      "matched": "running claude process",
+      "resume": "cd /Users/alex/dev/blog && claude --resume d890ec94-355d-51f7-8992-01eb4d06a663"
+    },
+    {
+      "id": "18A2AFF5-2B12-5116-923C-F9ABFC821C66",
+      "name": "~/Downloads",
+      "title": null,
+      "workspace": "blog",
+      "workspaceId": "1B58ED4F-B4B3-5EE3-989C-4A56016D5E9F",
+      "window": "main",
+      "cwd": "/Users/alex/Downloads",
+      "foreground": [],
+      "flagged": false,
+      "status": null,
+      "claude": null,
+      "restore": null,
+      "split": null,
+      "screen": "",
+      "snippet": "~/dev/agterm-session-kit/bin/agt-restore ~/agterm-snapshots/2026-10-13-091500.json 18A2AFF5-2B12-5116-923C-F9ABFC821C66"
+    }
+  ]
 }

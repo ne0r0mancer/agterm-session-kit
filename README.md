@@ -69,10 +69,19 @@ missing), with the saved name and directory, then types one line into it:
 2. else if it has a Claude conversation, `claude --resume <conversation-id>`;
 3. else nothing, a plain shell.
 
-The conversation is found, in order, from the running `claude` process (`~/.claude/sessions/<pid>.json`
-mapped to the agterm session through its `AGTERM_SESSION_ID`), from `--resume`/`--session-id` in the running
-command, or from a transcript named after the agterm session id (what the fish wrapper creates). Resuming by
-id is what keeps several conversations in one directory apart; `claude --continue` would pick the newest.
+The conversation is found, in order, from:
+
+1. a live Claude Code session in `~/.claude/sessions/*.json` whose process carries the agterm session's
+   `AGTERM_SESSION_ID` (works whatever the process is called: native `claude`, npm `node`, an SDK host);
+2. `--resume`/`--session-id` in the session's running command;
+3. a transcript named after the agterm session id, which is what the fish wrapper creates.
+
+The page shows the conversation id in every row and at the top of the details panel, with **copy id** and
+**copy resume command** (`cd <dir> && claude --resume <id>`, usable in any terminal or pasted to Claude), and
+says which rule matched. Resuming by id keeps several conversations in one directory apart, where
+`claude --continue` would pick the newest. A session with no match lists the five most recent conversations
+started in its directory, each with its own resume command, and a conversation open in two sessions at
+once is flagged **shared**, since two Claude processes writing to it interleave its history.
 
 ## The fish `claude` wrapper
 
